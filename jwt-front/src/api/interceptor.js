@@ -38,6 +38,18 @@ const handleLogout = async () => {
     await router.push("/login");
 }
 
+const addQueue = async(originalRequest, api) => {
+    return new Promise((resolve, reject) => {
+        failedQueue.push({resolve, reject})
+    }).then((token) => {
+        if (originalRequest.headers) {
+            originalRequest.headers.Authorization = token;
+        }
+
+        return api(originalRequest); // 새로 받은 토큰으로 재요청
+    }).catch((err) => {Promise.reject()})
+}
+
 const handleUnauthorizedError = async(originalRequest, api) => {
 
     // 리프레시 요청했는데 401인 경우
@@ -48,6 +60,6 @@ const handleUnauthorizedError = async(originalRequest, api) => {
     }
 
     if (isRefreshing) {
-
+        await addQueue(originalRequest, api);
     }
 }
