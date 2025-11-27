@@ -41,6 +41,10 @@ export const useAuthStore = defineStore("auth", () => {
         return accessToken.value;
     }
 
+    const setAccessToken = (token) => {
+        accessToken.value = token;
+    }
+
     const logout = async () => {
         await authApi.post(API_ENDPOINTS.AUTH.LOGOUT)
             .then(() => {})
@@ -53,5 +57,6 @@ export const useAuthStore = defineStore("auth", () => {
         existsAccessToken,
         getAccessToken,
         logout,
+        setAccessToken,
     }
 })

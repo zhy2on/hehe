@@ -1,6 +1,8 @@
 import {useAuthStore} from "@/stores/auth.js";
 import router from "@/routers/index.js";
 import {API_ENDPOINTS} from "@/api/endpoints.js";
+import {authApi} from "@/api/index.js";
+import axios from "axios";
 
 let isRefreshing = false;
 let failedQueue = [];
@@ -61,5 +63,35 @@ const handleUnauthorizedError = async(originalRequest, api) => {
 
     if (isRefreshing) {
         await addQueue(originalRequest, api);
+    }
+
+    return tokenRefreshing(originalRequest, api);
+}
+
+const tokenRefreshing = async (originalRequest, api) => {
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    try {
+
+        const refreshInstance = axios.create({
+            baseURL: authApi.defaults.baseURL,
+            withCredentials: true, // refresh token 사용
+        })
+        const refreshResponse = await refreshInstance.get(API_ENDPOINTS.AUTH.REFRESH_TOKEN);
+        const newAccessToken = refreshResponse.headers["authorization"];
+
+        if (newAccessToken) {
+            const authStore = useAuthStore();
+            authStore.setAccessToken(newAccessToken);
+
+            originalRequest.headers.Authorization = newAccessToken;
+        }
+
+    } catch(error) {
+        await handleLogout();
+        return Promise.reject();
+    } finally {
+        isRefreshing = false;
     }
 }
