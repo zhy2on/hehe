@@ -47,4 +47,7 @@ const handleUnauthorizedError = async(originalRequest, api) => {
         return Promise.resolve();
     }
 
+    if (isRefreshing) {
+
+    }
 }
