@@ -88,6 +88,9 @@ const tokenRefreshing = async (originalRequest, api) => {
             originalRequest.headers.Authorization = newAccessToken;
         }
 
+        setNewToken(null, newAccessToken);
+        return api(originalRequest); // 원래 요청 다시 날리기
+
     } catch(error) {
         await handleLogout();
         return Promise.reject();
